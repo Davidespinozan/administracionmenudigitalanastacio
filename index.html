@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anastacio · Panel Admin</title>
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/dp9l5i19b/image/upload/w_32,h_32,c_fit/logooficial_cys7ex.webp">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root {
+  --dark: #071826;
+  --dark2: #0A1F33;
+  --dark3: #0F2F4F;
+  --gold: #C9A24D;
+  --gold-l: #E6C76B;
+  --cta: #F26B1D;
+  --green: #25D366;
+  --red: #C9442B;
+  --cream: #F5F5F5;
+  --muted: #A0B4C0;
+  --amber: #F59E0B;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--dark);
+  color: var(--cream);
+  font-family: "Montserrat", sans-serif;
+  min-height: 100vh;
+}
+
+/* ═══ HEADER ═══ */
+.admin-header {
+  background: var(--dark2);
+  border-bottom: 1px solid rgba(201,162,77,.15);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.admin-logo { height: 40px; }
+.admin-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: .1em;
+  color: var(--gold);
+}
+.admin-title span { color: var(--muted); font-size: .85rem; letter-spacing: .05em; }
+.live-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px rgba(37,211,102,.5);
+  animation: pulse 2s ease-in-out infinite;
+  display: inline-block;
+  margin-left: .5rem;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(.8);} }
+
+.refresh-btn {
+  background: rgba(201,162,77,.1);
+  border: 1px solid rgba(201,162,77,.25);
+  color: var(--gold);
+  padding: .5rem 1rem;
+  border-radius: 8px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: .85rem;
+  letter-spacing: .1em;
+  cursor: pointer;
+  transition: all .2s;
+}
+.refresh-btn:hover { background: var(--gold); color: var(--dark); }
+
+/* ═══ TABS ═══ */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 1.5rem;
+  background: var(--dark2);
+  border-bottom: 1px solid rgba(201,162,77,.08);
+}
+.tab {
+  padding: .85rem 1.5rem;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  position: relative;
+}
+.tab:hover { color: var(--cream); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab-badge {
+  position: absolute;
+  top: .5rem;
+  right: .3rem;
+  background: var(--cta);
+  color: white;
+  font-size: .6rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  padding: .1rem .4rem;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ═══ STATS BAR ═══ */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+.stat-card {
+  background: var(--dark2);
+  border: 1px solid rgba(201,162,77,.1);
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+  transition: all .3s;
+}
+.stat-card:hover { border-color: rgba(201,162,77,.3); transform: translateY(-2px); }
+.stat-value {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2.2rem;
+  color: var(--gold);
+  line-height: 1;
+}
+.stat-label {
+  font-size: .7rem;
+  color: var(--muted);
+  letter-spacing: .15em;
+  margin-top: .3rem;
+  text-transform: uppercase;
+}
+
+/* ═══ CONTENT ═══ */
+.content { padding: 1.5rem; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ═══ TABLE ═══ */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(201,162,77,.1);
+  background: var(--dark2);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+thead { background: rgba(201,162,77,.08); }
+th {
+  padding: .8rem 1rem;
+  text-align: left;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: .8rem;
+  letter-spacing: .12em;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(201,162,77,.15);
+  white-space: nowrap;
+}
+td {
+  padding: .7rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  color: var(--cream);
+  vertical-align: top;
+}
+tr:hover td { background: rgba(201,162,77,.03); }
+tr:last-child td { border-bottom: none; }
+
+/* ═══ STATUS BADGES ═══ */
+.status {
+  display: inline-block;
+  padding: .2rem .6rem;
+  border-radius: 50px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.status.pending { background: rgba(245,158,11,.15); color: var(--amber); border: 1px solid rgba(245,158,11,.3); }
+.status.confirmed { background: rgba(37,211,102,.15); color: var(--green); border: 1px solid rgba(37,211,102,.3); }
+.status.preparing { background: rgba(242,107,29,.15); color: var(--cta); border: 1px solid rgba(242,107,29,.3); }
+.status.ready { background: rgba(59,130,246,.15); color: #3B82F6; border: 1px solid rgba(59,130,246,.3); }
+.status.delivered { background: rgba(201,162,77,.15); color: var(--gold); border: 1px solid rgba(201,162,77,.3); }
+.status.cancelled { background: rgba(201,68,43,.15); color: var(--red); border: 1px solid rgba(201,68,43,.3); }
+
+/* ═══ ORDER TYPE BADGES ═══ */
+.otype {
+  display: inline-block;
+  padding: .2rem .6rem;
+  border-radius: 50px;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.otype.domicilio { background: rgba(37,211,102,.12); color: var(--green); }
+.otype.recoger { background: rgba(201,162,77,.12); color: var(--gold); }
+.otype.mesa { background: rgba(242,107,29,.12); color: var(--cta); }
+
+/* ═══ STATUS SELECT ═══ */
+.status-select {
+  background: var(--dark);
+  color: var(--cream);
+  border: 1px solid rgba(201,162,77,.2);
+  padding: .3rem .5rem;
+  border-radius: 6px;
+  font-size: .75rem;
+  font-family: "Montserrat", sans-serif;
+  cursor: pointer;
+  outline: none;
+}
+.status-select:focus { border-color: var(--gold); }
+.status-select option { background: var(--dark); }
+
+/* ═══ ITEMS LIST ═══ */
+.items-list { font-size: .78rem; color: var(--muted); line-height: 1.6; }
+.items-list strong { color: var(--cream); }
+
+/* ═══ EMPTY STATE ═══ */
+.empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--muted);
+}
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .4; }
+.empty-text { font-size: .9rem; }
+
+/* ═══ SOUND TOGGLE ═══ */
+.sound-toggle {
+  background: none;
+  border: 1px solid rgba(201,162,77,.2);
+  color: var(--muted);
+  padding: .45rem .7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all .2s;
+}
+.sound-toggle.on { color: var(--gold); border-color: var(--gold); }
+
+/* ═══ NEW ORDER FLASH ═══ */
+@keyframes newOrder {
+  0% { background: rgba(37,211,102,.15); }
+  50% { background: rgba(37,211,102,.05); }
+  100% { background: transparent; }
+}
+tr.new-order { animation: newOrder 2s ease; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: .7rem; padding: 1rem; }
+  .stat-card { padding: .8rem; }
+  .stat-value { font-size: 1.6rem; }
+  .content { padding: 1rem; }
+  th, td { padding: .5rem .6rem; font-size: .78rem; }
+  .admin-title span { display: none; }
+  .tab { padding: .7rem .8rem; font-size: .85rem; }
+}
+
+/* ═══ NOTIFICATION TOAST ═══ */
+.notif-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: var(--green);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1rem;
+  letter-spacing: .08em;
+  box-shadow: 0 8px 30px rgba(37,211,102,.4);
+  transform: translateX(120%);
+  transition: transform .3s ease;
+  z-index: 9999;
+}
+.notif-toast.show { transform: translateX(0); }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="login-screen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="background:var(--dark2);border:1px solid rgba(201,162,77,.15);border-radius:16px;padding:2.5rem;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);">
+    <img src="https://res.cloudinary.com/dp9l5i19b/image/upload/f_auto,q_auto/logooficial_cys7ex.webp" alt="Anastacio" style="height:60px;margin-bottom:1.5rem;opacity:.85;">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.1em;color:var(--gold);margin-bottom:.3rem;">PANEL ADMIN</h2>
+    <p style="color:var(--muted);font-size:.8rem;margin-bottom:1.5rem;">Inicia sesión para continuar</p>
+    <input type="email" id="login-email" placeholder="Email" style="width:100%;padding:.7rem .9rem;background:var(--dark);border:1px solid rgba(201,162,77,.18);color:var(--cream);font-family:'Montserrat',sans-serif;font-size:.9rem;margin-bottom:.6rem;outline:none;border-radius:10px;">
+    <input type="password" id="login-pass" placeholder="Contraseña" style="width:100%;padding:.7rem .9rem;background:var(--dark);border:1px solid rgba(201,162,77,.18);color:var(--cream);font-family:'Montserrat',sans-serif;font-size:.9rem;margin-bottom:.6rem;outline:none;border-radius:10px;">
+    <div id="login-error" style="color:var(--red);font-size:.78rem;margin-bottom:.6rem;display:none;"></div>
+    <button onclick="doLogin()" style="width:100%;padding:.75rem;background:var(--gold);color:var(--dark);border:none;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;cursor:pointer;border-radius:10px;transition:all .2s;">ENTRAR</button>
+    <p style="color:var(--muted);font-size:.65rem;margin-top:1rem;">Solo personal autorizado</p>
+  </div>
+</div>
+
+<!-- ═══ ADMIN APP (hidden until login) ═══ -->
+<div id="admin-app" style="display:none;">
+
+<header class="admin-header">
+  <div class="admin-header-left">
+    <img src="https://res.cloudinary.com/dp9l5i19b/image/upload/f_auto,q_auto/logooficial_cys7ex.webp" alt="Anastacio" class="admin-logo">
+    <div class="admin-title">
+      PANEL ADMIN <span>· Anastacio</span>
+      <span class="live-dot"></span>
+    </div>
+  </div>
+  <div style="display:flex;gap:.5rem;align-items:center;">
+    <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()" title="Sonido de notificación">🔇</button>
+    <button class="refresh-btn" onclick="loadAll()">↻ ACTUALIZAR</button>
+    <button class="refresh-btn" onclick="doLogout()" style="border-color:rgba(201,68,43,.3);color:var(--red);">SALIR</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('orders')">
+    🛒 PEDIDOS <span class="tab-badge" id="orders-badge" style="display:none">0</span>
+  </div>
+  <div class="tab" onclick="switchTab('leads')">
+    👥 LEADS <span class="tab-badge" id="leads-badge" style="display:none">0</span>
+  </div>
+</div>
+
+<div class="stats-bar" id="stats-bar">
+  <div class="stat-card">
+    <div class="stat-value" id="stat-orders-today">—</div>
+    <div class="stat-label">Pedidos hoy</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-revenue-today">—</div>
+    <div class="stat-label">Venta hoy</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-pending">—</div>
+    <div class="stat-label">Pendientes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-leads-total">—</div>
+    <div class="stat-label">Leads total</div>
+  </div>
+</div>
+
+<div class="content">
+  <!-- ORDERS PANEL -->
+  <div class="panel active" id="panel-orders">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>HORA</th>
+            <th>TIPO</th>
+            <th>CLIENTE</th>
+            <th>PEDIDO</th>
+            <th>TOTAL</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="orders-body">
+          <tr><td colspan="6"><div class="empty"><div class="empty-icon">🦐</div><div class="empty-text">Cargando pedidos...</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEADS PANEL -->
+  <div class="panel" id="panel-leads">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>FECHA</th>
+            <th>NOMBRE</th>
+            <th>WHATSAPP</th>
+            <th>EMAIL</th>
+            <th>FUENTE</th>
+          </tr>
+        </thead>
+        <tbody id="leads-body">
+          <tr><td colspan="5"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Cargando leads...</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION TOAST -->
+</div><!-- end admin-app -->
+<div class="notif-toast" id="notif-toast">🦐 ¡NUEVO PEDIDO!</div>
+
+<script>
+// ═══ SUPABASE ═══
+var SUPABASE_URL = 'https://hqrwjlrqzslkwhwqcmnh.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxcndqbHJxenNsa3dod3FjbW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDYwMTcsImV4cCI6MjA4Nzg4MjAxN30.tNyO18E7lDNEYH28P_DGxSg9pf1yYysVpJuMwboJOoU';
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══ AUTH ═══
+async function doLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-pass').value;
+  var errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (!email || !pass) {
+    errEl.textContent = 'Ingresa email y contraseña';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var { data, error } = await sb.auth.signInWithPassword({ email: email, password: pass });
+
+  if (error) {
+    errEl.textContent = 'Email o contraseña incorrectos';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  showAdmin();
+}
+
+// Enter key on password field
+document.getElementById('login-pass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+function showAdmin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-app').style.display = 'block';
+  loadAll();
+  setupRealtime();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('admin-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+}
+
+// Check if already logged in
+sb.auth.getSession().then(function(res) {
+  if (res.data.session) {
+    showAdmin();
+  }
+});
+
+// ═══ STATE ═══
+var soundOn = false;
+var knownOrderIds = {};
+
+// ═══ SOUND ═══
+function toggleSound() {
+  soundOn = !soundOn;
+  var btn = document.getElementById('sound-toggle');
+  btn.textContent = soundOn ? '🔔' : '🔇';
+  btn.classList.toggle('on', soundOn);
+}
+
+function playNotifSound() {
+  if (!soundOn) return;
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(800, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch(e) {}
+}
+
+function showNotification(msg) {
+  var toast = document.getElementById('notif-toast');
+  toast.textContent = msg || '🦐 ¡NUEVO PEDIDO!';
+  toast.classList.add('show');
+  playNotifSound();
+  setTimeout(function() { toast.classList.remove('show'); }, 4000);
+}
+
+// ═══ TABS ═══
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ═══ FORMAT HELPERS ═══
+function formatTime(dateStr) {
+  var d = new Date(dateStr);
+  return d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+function formatDate(dateStr) {
+  var d = new Date(dateStr);
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + formatTime(dateStr);
+}
+function formatMoney(n) {
+  return '$' + Number(n).toLocaleString('es-MX');
+}
+function typeLabel(t) {
+  var labels = { domicilio: '🛵 Domicilio', recoger: '🥡 Recoger', mesa: '🍽 Mesa' };
+  return labels[t] || t;
+}
+function statusLabels(s) {
+  var labels = { pending: 'Pendiente', confirmed: 'Confirmado', preparing: 'Preparando', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' };
+  return labels[s] || s;
+}
+
+// ═══ LOAD ORDERS ═══
+async function loadOrders() {
+  var today = new Date();
+  today.setHours(0,0,0,0);
+
+  var { data, error } = await sb
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) { console.error('Orders error:', error); return; }
+
+  var body = document.getElementById('orders-body');
+  var pendingCount = 0;
+  var todayOrders = 0;
+  var todayRevenue = 0;
+
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🦐</div><div class="empty-text">No hay pedidos aún</div></div></td></tr>';
+  } else {
+    var rows = '';
+    data.forEach(function(order) {
+      var isToday = new Date(order.created_at) >= today;
+      if (isToday) { todayOrders++; todayRevenue += Number(order.total); }
+      if (order.status === 'pending') pendingCount++;
+
+      var isNew = !knownOrderIds[order.id];
+      knownOrderIds[order.id] = true;
+
+      // Customer info
+      var customer = order.customer_name || '—';
+      if (order.customer_phone) customer += '<br><small style="color:var(--muted)">' + order.customer_phone + '</small>';
+      if (order.delivery_address) customer += '<br><small style="color:var(--muted)">📍 ' + order.delivery_address + '</small>';
+      if (order.table_number) customer += '<br><small style="color:var(--muted)">Mesa ' + order.table_number + '</small>';
+      if (order.pickup_time) customer += '<br><small style="color:var(--muted)">⏱ ' + order.pickup_time + '</small>';
+
+      // Items
+      var items = '';
+      if (order.items && Array.isArray(order.items)) {
+        items = order.items.map(function(item) {
+          return '<strong>' + item.qty + 'x</strong> ' + item.name;
+        }).join('<br>');
+      }
+
+      // Status select
+      var statuses = ['pending','confirmed','preparing','ready','delivered','cancelled'];
+      var selectHtml = '<select class="status-select" onchange="updateStatus(\'' + order.id + '\', this.value)">';
+      statuses.forEach(function(s) {
+        selectHtml += '<option value="' + s + '"' + (s === order.status ? ' selected' : '') + '>' + statusLabels(s) + '</option>';
+      });
+      selectHtml += '</select>';
+
+      rows += '<tr class="' + (isNew ? 'new-order' : '') + '">';
+      rows += '<td style="white-space:nowrap">' + formatTime(order.created_at) + '<br><small style="color:var(--muted)">' + new Date(order.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) + '</small></td>';
+      rows += '<td><span class="otype ' + order.order_type + '">' + typeLabel(order.order_type) + '</span></td>';
+      rows += '<td>' + customer + '</td>';
+      rows += '<td><div class="items-list">' + items + '</div></td>';
+      rows += '<td style="white-space:nowrap;font-family:Bebas Neue;font-size:1.1rem;color:var(--gold)">' + formatMoney(order.total) + '</td>';
+      rows += '<td>' + selectHtml + '</td>';
+      rows += '</tr>';
+    });
+    body.innerHTML = rows;
+  }
+
+  // Update stats
+  document.getElementById('stat-orders-today').textContent = todayOrders;
+  document.getElementById('stat-revenue-today').textContent = formatMoney(todayRevenue);
+  document.getElementById('stat-pending').textContent = pendingCount;
+
+  // Badge
+  var badge = document.getElementById('orders-badge');
+  if (pendingCount > 0) {
+    badge.textContent = pendingCount;
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ═══ UPDATE ORDER STATUS ═══
+async function updateStatus(id, status) {
+  var { error } = await sb
+    .from('orders')
+    .update({ status: status })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Update error:', error);
+    alert('Error al actualizar status');
+  } else {
+    loadOrders();
+  }
+}
+
+// ═══ LOAD LEADS ═══
+async function loadLeads() {
+  var { data, error } = await sb
+    .from('leads')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error) { console.error('Leads error:', error); return; }
+
+  var body = document.getElementById('leads-body');
+
+  if (!data || data.length === 0) {
+    body.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">No hay leads aún</div></div></td></tr>';
+  } else {
+    var rows = '';
+    data.forEach(function(lead) {
+      rows += '<tr>';
+      rows += '<td style="white-space:nowrap">' + formatDate(lead.created_at) + '</td>';
+      rows += '<td>' + (lead.name || '—') + '</td>';
+      rows += '<td>' + (lead.phone || '—') + '</td>';
+      rows += '<td>' + (lead.email || '—') + '</td>';
+      rows += '<td><span class="otype recoger">' + (lead.source || 'bar') + '</span></td>';
+      rows += '</tr>';
+    });
+    body.innerHTML = rows;
+  }
+
+  // Stats
+  document.getElementById('stat-leads-total').textContent = data ? data.length : 0;
+  var lBadge = document.getElementById('leads-badge');
+  if (data && data.length > 0) {
+    lBadge.textContent = data.length;
+    lBadge.style.display = '';
+  } else {
+    lBadge.style.display = 'none';
+  }
+}
+
+// ═══ LOAD ALL ═══
+function loadAll() {
+  loadOrders();
+  loadLeads();
+}
+
+// ═══ REALTIME ═══
+function setupRealtime() {
+  sb.channel('orders-realtime')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, function(payload) {
+      showNotification('🦐 ¡NUEVO PEDIDO! — ' + typeLabel(payload.new.order_type) + ' — ' + formatMoney(payload.new.total));
+      loadOrders();
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, function(payload) {
+      loadLeads();
+    })
+    .subscribe();
+}
+
+// ═══ INIT ═══
+loadAll();
+setupRealtime();
+// Auto refresh every 30s as backup
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
