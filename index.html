@@ -6,7 +6,7 @@
 <title>Anastacio · Panel Admin</title>
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/dp9l5i19b/image/upload/w_32,h_32,c_fit/logooficial_cys7ex.webp">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --dark: #071826;
@@ -264,13 +264,106 @@ tr.new-order { animation: newOrder 2s ease; }
 
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 768px) {
-  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: .7rem; padding: 1rem; }
-  .stat-card { padding: .8rem; }
-  .stat-value { font-size: 1.6rem; }
-  .content { padding: 1rem; }
-  th, td { padding: .5rem .6rem; font-size: .78rem; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: .7rem; padding: .8rem; }
+  .stat-card { padding: .7rem; }
+  .stat-value { font-size: 1.5rem; }
+  .stat-label { font-size: .6rem; }
+  .content { padding: .7rem; }
   .admin-title span { display: none; }
-  .tab { padding: .7rem .8rem; font-size: .85rem; }
+  .admin-title { font-size: 1.2rem; }
+  .admin-logo { height: 30px; }
+  .admin-header { padding: .7rem 1rem; }
+  .admin-header-left { gap: .6rem; }
+  .refresh-btn { padding: .4rem .7rem; font-size: .75rem; }
+  .tab { padding: .65rem .7rem; font-size: .8rem; }
+  .tab-badge { font-size: .55rem; padding: .05rem .3rem; top: .35rem; right: .1rem; }
+
+  /* Cards layout for orders on mobile */
+  #panel-orders .table-wrap table thead { display: none; }
+  #panel-orders .table-wrap table,
+  #panel-orders .table-wrap table tbody,
+  #panel-orders .table-wrap table tr,
+  #panel-orders .table-wrap table td {
+    display: block;
+    width: 100%;
+  }
+  #panel-orders .table-wrap table tr {
+    background: var(--dark2);
+    border: 1px solid rgba(201,162,77,.1);
+    border-radius: 12px;
+    margin-bottom: .7rem;
+    padding: .8rem;
+    position: relative;
+  }
+  #panel-orders .table-wrap table tr:hover td { background: none; }
+  #panel-orders .table-wrap table td {
+    border: none;
+    padding: .25rem 0;
+    font-size: .82rem;
+  }
+  /* Time - top right */
+  #panel-orders .table-wrap table td:nth-child(1) {
+    position: absolute;
+    top: .8rem;
+    right: .8rem;
+    width: auto;
+    text-align: right;
+    font-size: .75rem;
+    color: var(--muted);
+  }
+  /* Type badge */
+  #panel-orders .table-wrap table td:nth-child(2) { margin-bottom: .3rem; }
+  /* Customer */
+  #panel-orders .table-wrap table td:nth-child(3) { font-size: .85rem; margin-bottom: .4rem; padding-right: 5rem; }
+  /* Items */
+  #panel-orders .table-wrap table td:nth-child(4) {
+    background: rgba(0,0,0,.15);
+    border-radius: 8px;
+    padding: .6rem .7rem;
+    margin: .4rem 0;
+  }
+  /* Total */
+  #panel-orders .table-wrap table td:nth-child(5) {
+    font-size: 1.2rem;
+    padding-top: .4rem;
+    display: inline-block;
+    width: auto;
+  }
+  /* Status */
+  #panel-orders .table-wrap table td:nth-child(6) {
+    display: inline-block;
+    width: auto;
+    float: right;
+    padding-top: .4rem;
+  }
+  #panel-orders .table-wrap { border: none; background: none; }
+  .status-select { font-size: .8rem; padding: .4rem .5rem; }
+
+  /* Leads table on mobile */
+  #panel-leads .table-wrap table thead { display: none; }
+  #panel-leads .table-wrap table,
+  #panel-leads .table-wrap table tbody,
+  #panel-leads .table-wrap table tr,
+  #panel-leads .table-wrap table td {
+    display: block;
+    width: 100%;
+  }
+  #panel-leads .table-wrap table tr {
+    background: var(--dark2);
+    border: 1px solid rgba(201,162,77,.1);
+    border-radius: 12px;
+    margin-bottom: .5rem;
+    padding: .7rem .8rem;
+  }
+  #panel-leads .table-wrap table tr:hover td { background: none; }
+  #panel-leads .table-wrap table td {
+    border: none;
+    padding: .15rem 0;
+    font-size: .82rem;
+  }
+  #panel-leads .table-wrap table td:nth-child(1) { font-size: .7rem; color: var(--muted); }
+  #panel-leads .table-wrap table td:nth-child(2) { font-size: .95rem; font-weight: 600; }
+  #panel-leads .table-wrap { border: none; background: none; }
 }
 
 /* ═══ NOTIFICATION TOAST ═══ */
@@ -346,8 +439,24 @@ tr.new-order { animation: newOrder 2s ease; }
     <div class="stat-label">Venta hoy</div>
   </div>
   <div class="stat-card">
+    <div class="stat-value" id="stat-revenue-week">—</div>
+    <div class="stat-label">Venta semana</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-revenue-month">—</div>
+    <div class="stat-label">Venta mes</div>
+  </div>
+  <div class="stat-card">
     <div class="stat-value" id="stat-pending">—</div>
     <div class="stat-label">Pendientes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-ticket">—</div>
+    <div class="stat-label">Ticket promedio</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="stat-top-item">—</div>
+    <div class="stat-label">Más pedido hoy</div>
   </div>
   <div class="stat-card">
     <div class="stat-value" id="stat-leads-total">—</div>
@@ -527,30 +636,56 @@ function statusLabels(s) {
 
 // ═══ LOAD ORDERS ═══
 async function loadOrders() {
-  var today = new Date();
-  today.setHours(0,0,0,0);
+  var now = new Date();
+  var today = new Date(now); today.setHours(0,0,0,0);
+  var weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7); weekAgo.setHours(0,0,0,0);
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   var { data, error } = await sb
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(500);
 
-  if (error) { console.error('Orders error:', error); return; }
+  if (error) { console.error('Orders error:', JSON.stringify(error)); return; }
 
   var body = document.getElementById('orders-body');
   var pendingCount = 0;
   var todayOrders = 0;
   var todayRevenue = 0;
+  var weekRevenue = 0;
+  var monthRevenue = 0;
+  var totalRevenue = 0;
+  var itemCounts = {};
 
   if (!data || data.length === 0) {
     body.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🦐</div><div class="empty-text">No hay pedidos aún</div></div></td></tr>';
   } else {
     var rows = '';
     data.forEach(function(order) {
-      var isToday = new Date(order.created_at) >= today;
-      if (isToday) { todayOrders++; todayRevenue += Number(order.total); }
+      var orderDate = new Date(order.created_at);
+      var orderTotal = Number(order.total);
+      var isToday = orderDate >= today;
+      var isWeek = orderDate >= weekAgo;
+      var isMonth = orderDate >= monthStart;
+
+      // Skip cancelled for revenue stats
+      if (order.status !== 'cancelled') {
+        if (isToday) { todayOrders++; todayRevenue += orderTotal; }
+        if (isWeek) weekRevenue += orderTotal;
+        if (isMonth) monthRevenue += orderTotal;
+        totalRevenue += orderTotal;
+      }
+
       if (order.status === 'pending') pendingCount++;
+
+      // Count items for top item (today only)
+      if (isToday && order.items && Array.isArray(order.items)) {
+        order.items.forEach(function(item) {
+          var name = item.name || 'Desconocido';
+          itemCounts[name] = (itemCounts[name] || 0) + (item.qty || 1);
+        });
+      }
 
       var isNew = !knownOrderIds[order.id];
       knownOrderIds[order.id] = true;
@@ -590,10 +725,29 @@ async function loadOrders() {
     body.innerHTML = rows;
   }
 
+  // Top item
+  var topItem = '—';
+  var topCount = 0;
+  for (var name in itemCounts) {
+    if (itemCounts[name] > topCount) {
+      topCount = itemCounts[name];
+      topItem = name;
+    }
+  }
+  // Truncate long names
+  if (topItem.length > 12) topItem = topItem.substring(0, 11) + '…';
+
+  // Ticket promedio
+  var avgTicket = todayOrders > 0 ? Math.round(todayRevenue / todayOrders) : 0;
+
   // Update stats
   document.getElementById('stat-orders-today').textContent = todayOrders;
   document.getElementById('stat-revenue-today').textContent = formatMoney(todayRevenue);
+  document.getElementById('stat-revenue-week').textContent = formatMoney(weekRevenue);
+  document.getElementById('stat-revenue-month').textContent = formatMoney(monthRevenue);
   document.getElementById('stat-pending').textContent = pendingCount;
+  document.getElementById('stat-ticket').textContent = avgTicket > 0 ? formatMoney(avgTicket) : '—';
+  document.getElementById('stat-top-item').textContent = topItem;
 
   // Badge
   var badge = document.getElementById('orders-badge');
@@ -682,7 +836,7 @@ function setupRealtime() {
 loadAll();
 setupRealtime();
 // Auto refresh every 30s as backup
-setInterval(loadAll, 30000);
+setInterval(loadAll, 10000);
 </script>
 </body>
 </html>
