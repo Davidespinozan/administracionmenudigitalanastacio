@@ -245,8 +245,10 @@ function showAdmin(){document.getElementById('login-screen').style.display='none
 async function doLogout(){await sb.auth.signOut();document.getElementById('admin-app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('login-pass').value='';}
 sb.auth.getSession().then(function(r){if(r.data.session)showAdmin();});
 
-function toggleSound(){soundOn=!soundOn;var b=document.getElementById('sound-toggle');b.textContent=soundOn?'🔔':'🔇';b.classList.toggle('on',soundOn);}
-function playNotifSound(){if(!soundOn)return;try{var a=new Audio('https://res.cloudinary.com/dp9l5i19b/video/upload/v1772311938/mixkit-software-interface-start-2574_najvah.wav');a.volume=0.5;a.play();}catch(e){}}
+var notifAudio = new Audio('https://res.cloudinary.com/dp9l5i19b/video/upload/v1772311938/mixkit-software-interface-start-2574_najvah.wav');
+notifAudio.volume = 0.5;
+function toggleSound(){soundOn=!soundOn;var b=document.getElementById('sound-toggle');b.textContent=soundOn?'🔔':'🔇';b.classList.toggle('on',soundOn);if(soundOn){notifAudio.play().then(function(){notifAudio.pause();notifAudio.currentTime=0;}).catch(function(){});}}
+function playNotifSound(){if(!soundOn)return;try{notifAudio.currentTime=0;notifAudio.play();}catch(e){}}
 function showNotification(m){var t=document.getElementById('notif-toast');t.textContent=m;t.classList.add('show');playNotifSound();setTimeout(function(){t.classList.remove('show');},4000);}
 
 function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');}
