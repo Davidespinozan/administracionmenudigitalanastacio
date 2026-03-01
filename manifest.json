@@ -2,7 +2,7 @@
   "name": "Anastacio · Panel Admin",
   "short_name": "Anastacio Admin",
   "description": "Panel de administración de pedidos - Restaurante Anastacio",
-  "start_url": "/adminmenu.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#071826",
   "theme_color": "#C9A24D",
