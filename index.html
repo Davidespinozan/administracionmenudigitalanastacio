@@ -31,6 +31,7 @@ background:radial-gradient(ellipse at 10% 0%,rgba(201,162,77,.08),transparent 50
 *:focus-visible{outline:2px solid rgba(201,162,77,.3);outline-offset:2px;border-radius:8px;}
 button,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease;}
 
+.safe-area-cover{position:fixed;top:0;left:0;right:0;height:constant(safe-area-inset-top);height:env(safe-area-inset-top);background:#071826;z-index:200;}
 .admin-header{background:var(--glass-strong);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border);padding:.8rem 1.5rem;padding-top:calc(constant(safe-area-inset-top) + .8rem);padding-top:calc(env(safe-area-inset-top) + .8rem);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);}
 .admin-header-left{display:flex;align-items:center;gap:.8rem;}
 .admin-logo{height:36px;background:#071826;border-radius:10px;padding:3px;}
@@ -209,6 +210,7 @@ body{background:radial-gradient(ellipse at 10% 0%,rgba(201,162,77,.05),transpare
 <button onclick="doLogin()" style="width:100%;padding:.8rem;background:var(--gold);color:var(--dark);border:none;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:14px;transition:all .18s ease;box-shadow:0 12px 28px rgba(201,162,77,.2);">ENTRAR</button>
 </div>
 </div>
+<div class="safe-area-cover"></div>
 <div id="admin-app" style="display:none;">
 <header class="admin-header">
 <div class="admin-header-left">
