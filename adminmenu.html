@@ -149,8 +149,8 @@ tr:last-child td{border-bottom:none;}
 .empty{text-align:center;padding:3.5rem 2rem;color:var(--muted);}
 .empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.3;}
 .empty-text{font-size:.82rem;font-weight:500;}
-.notif-toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-120%);background:var(--green);color:white;padding:.7rem 1.4rem;border-radius:999px;font-family:"Montserrat",sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.02em;box-shadow:0 16px 40px rgba(37,211,102,.35);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:9999;}
-.notif-toast.show{transform:translateX(-50%) translateY(0);}
+.notif-toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-300%);background:var(--green);color:white;padding:.7rem 1.4rem;border-radius:999px;font-family:"Montserrat",sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.02em;box-shadow:0 16px 40px rgba(37,211,102,.35);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:9999;visibility:hidden;}
+.notif-toast.show{transform:translateX(-50%) translateY(0);visibility:visible;}
 
 @media(max-width:768px){
 body{background:radial-gradient(ellipse at 10% 0%,rgba(201,162,77,.05),transparent 50%),linear-gradient(180deg,#071826 0%,#060f18 100%);}
