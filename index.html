@@ -15,8 +15,8 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 <style>
 :root{--dark:#071826;--ink:#08141b;--gold:#C9A24D;--gold-l:#E6C76B;--cta:#F26B1D;--green:#059669;--red:#dc2626;--cream:#F5F5F5;--muted:#59707a;--amber:#d97706;--blue:#2563eb;--purple:#7c3aed;
 --bg:#f0f4f6;--panel:rgba(255,255,255,.82);--panel-strong:rgba(255,255,255,.94);--line:rgba(8,20,27,.08);--line-strong:rgba(8,20,27,.14);--shadow:0 18px 40px rgba(3,14,19,.08);--shadow-strong:0 28px 60px rgba(3,14,19,.14);--shadow-gold:0 14px 30px rgba(201,162,77,.16);}
@@ -312,7 +312,8 @@ tr:last-child td{border-bottom:none;}
 var SUPABASE_URL='https://hqrwjlrqzslkwhwqcmnh.supabase.co';
 var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxcndqbHJxenNsa3dod3FjbW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDYwMTcsImV4cCI6MjA4Nzg4MjAxN30.tNyO18E7lDNEYH28P_DGxSg9pf1yYysVpJuMwboJOoU';
 var sb;
-try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);}catch(e){console.error('Supabase SDK not loaded:',e);document.addEventListener('DOMContentLoaded',function(){var err=document.getElementById('login-error');if(err){err.textContent='Error al cargar. Recarga la página.';err.style.display='block';}});}
+function initSupabase(){if(window.supabase){sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return true;}return false;}
+if(!initSupabase()){window.addEventListener('load',function(){if(!initSupabase()){var err=document.getElementById('login-error');if(err){err.textContent='Error al cargar. Recarga la página.';err.style.display='block';}}});}
 var soundOn=false,allOrders=[],allLeads=[],allPageViews=[],allPixelEvents=[],knownOrderIds={},dateRange='today';
 var chartRevenue,chartTypes,chartHours,chartWeekday,chartTicket,chartVisitsDay,chartCheckoutMethod,chartScroll;
 
