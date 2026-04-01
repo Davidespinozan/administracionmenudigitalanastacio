@@ -206,7 +206,7 @@ tr:last-child td{border-bottom:none;}
 <input type="email" id="login-email" placeholder="Email" style="width:100%;padding:.75rem 1rem;background:rgba(255,255,255,.9);border:1.5px solid rgba(8,20,27,.14);color:#08141b;font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:500;margin-bottom:.5rem;outline:none;border-radius:14px;transition:border-color .18s,box-shadow .18s;">
 <input type="password" id="login-pass" placeholder="Contraseña" style="width:100%;padding:.75rem 1rem;background:rgba(255,255,255,.9);border:1.5px solid rgba(8,20,27,.14);color:#08141b;font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:500;margin-bottom:.5rem;outline:none;border-radius:14px;transition:border-color .18s,box-shadow .18s;">
 <div id="login-error" style="color:#dc2626;font-size:.72rem;font-weight:600;margin-bottom:.5rem;display:none;"></div>
-<button onclick="doLogin()" style="width:100%;padding:.85rem;background:var(--gold);color:white;border:none;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:16px;transition:all .18s ease;box-shadow:0 16px 34px rgba(201,162,77,.22);position:relative;z-index:10;">ENTRAR</button>
+<button type="button" id="login-btn" style="width:100%;padding:.85rem;background:#C9A24D;color:white;border:none;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:16px;transition:all .18s ease;box-shadow:0 16px 34px rgba(201,162,77,.22);position:relative;z-index:10;">ENTRAR</button>
 </div>
 </div>
 <div id="admin-app" style="display:none;">
@@ -316,6 +316,7 @@ var soundOn=false,allOrders=[],allLeads=[],allPageViews=[],allPixelEvents=[],kno
 var chartRevenue,chartTypes,chartHours,chartWeekday,chartTicket,chartVisitsDay,chartCheckoutMethod,chartScroll;
 
 async function doLogin(){var email=document.getElementById('login-email').value.trim();var pass=document.getElementById('login-pass').value;var err=document.getElementById('login-error');err.style.display='none';if(!email||!pass){err.textContent='Ingresa email y contraseña';err.style.display='block';return;}var{data,error}=await sb.auth.signInWithPassword({email:email,password:pass});if(error){err.textContent='Email o contraseña incorrectos';err.style.display='block';return;}showAdmin();}
+document.getElementById('login-btn').addEventListener('click',function(){doLogin();});
 document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 function showAdmin(){document.getElementById('login-screen').style.display='none';document.getElementById('admin-app').style.display='block';loadAll();setupRealtime();}
 async function doLogout(){await sb.auth.signOut();document.getElementById('admin-app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('login-pass').value='';}
