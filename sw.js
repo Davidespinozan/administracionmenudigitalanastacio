@@ -1,4 +1,4 @@
-var CACHE_NAME = 'anastacio-admin-v23';
+var CACHE_NAME = 'anastacio-admin-v24';
 var urlsToCache = [
   '/',
   '/index.html',

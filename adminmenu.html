@@ -32,7 +32,8 @@ background:radial-gradient(circle at top left,rgba(201,162,77,.15),transparent 3
 *:focus-visible{outline:2px solid rgba(201,162,77,.3);outline-offset:2px;border-radius:8px;}
 button,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease;}
 
-.admin-header{background:linear-gradient(135deg,var(--dark) 0%,#0a2035 100%);padding:.8rem 1.5rem;padding-top:calc(env(safe-area-inset-top, 0px) + .8rem);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 8px 32px rgba(7,24,38,.18);}
+.admin-header{background:linear-gradient(135deg,var(--dark) 0%,#0a2035 100%);padding:.8rem 1.5rem;padding-top:calc(env(safe-area-inset-top, 0px) + .8rem);display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100;box-shadow:0 8px 32px rgba(7,24,38,.18);}
+.admin-header-spacer{height:calc(env(safe-area-inset-top, 0px) + 3.2rem);flex-shrink:0;}
 .admin-header-left{display:flex;align-items:center;gap:.8rem;}
 .admin-logo{height:36px;border-radius:10px;}
 .admin-title{font-family:"Space Grotesk","Montserrat",sans-serif;font-size:1.2rem;letter-spacing:-.01em;font-weight:700;color:var(--gold);}
@@ -221,6 +222,7 @@ tr:last-child td{border-bottom:none;}
 <button class="h-btn danger" onclick="doLogout()">SALIR</button>
 </div>
 </header>
+<div class="admin-header-spacer"></div>
 <div class="tabs">
 <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)">📊 DASHBOARD</div>
 <div class="tab" data-tab="orders" onclick="switchTab('orders',this)">🛒 PEDIDOS <span class="tab-badge" id="orders-badge" style="display:none">0</span></div>
