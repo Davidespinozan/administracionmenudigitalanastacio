@@ -33,7 +33,8 @@ background:radial-gradient(circle at top left,rgba(201,162,77,.15),transparent 3
 *:focus-visible{outline:2px solid rgba(201,162,77,.3);outline-offset:2px;border-radius:8px;}
 button,input,select,textarea{transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease;}
 
-.admin-header{background:linear-gradient(135deg,var(--dark) 0%,#0a2035 100%);padding:.8rem 1.5rem;padding-top:calc(constant(safe-area-inset-top) + 1rem);padding-top:calc(env(safe-area-inset-top) + 1rem);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 8px 32px rgba(7,24,38,.18);}
+#admin-app{padding-top:constant(safe-area-inset-top);padding-top:env(safe-area-inset-top);}
+.admin-header{background:linear-gradient(135deg,var(--dark) 0%,#0a2035 100%);padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:constant(safe-area-inset-top);top:env(safe-area-inset-top);z-index:100;box-shadow:0 8px 32px rgba(7,24,38,.18);}
 .admin-header-left{display:flex;align-items:center;gap:.8rem;}
 .admin-logo{height:36px;border-radius:10px;}
 .admin-title{font-family:"Space Grotesk","Montserrat",sans-serif;font-size:1.2rem;letter-spacing:-.01em;font-weight:700;color:var(--gold);}
