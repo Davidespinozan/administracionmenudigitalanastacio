@@ -311,7 +311,7 @@ tr:last-child td{border-bottom:none;}
 <script>
 var SUPABASE_URL='https://hqrwjlrqzslkwhwqcmnh.supabase.co';
 var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxcndqbHJxenNsa3dod3FjbW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDYwMTcsImV4cCI6MjA4Nzg4MjAxN30.tNyO18E7lDNEYH28P_DGxSg9pf1yYysVpJuMwboJOoU';
-var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var soundOn=false,allOrders=[],allLeads=[],allPageViews=[],allPixelEvents=[],knownOrderIds={},dateRange='today';
 var chartRevenue,chartTypes,chartHours,chartWeekday,chartTicket,chartVisitsDay,chartCheckoutMethod,chartScroll;
 
