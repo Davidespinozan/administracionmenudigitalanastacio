@@ -239,6 +239,12 @@ body{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 4rem);}
 <div class="tab" data-tab="products" onclick="switchTab('products',this)">🦐 PRODUCTOS</div>
 </div>
 <div class="date-filter">
+<span class="df-label">Sucursal:</span>
+<button class="df-btn active" onclick="setSucursal('all',this)">Todas</button>
+<button class="df-btn" onclick="setSucursal('cln',this)">Culiacán</button>
+<button class="df-btn" onclick="setSucursal('gdl',this)">Guadalajara</button>
+</div>
+<div class="date-filter">
 <span class="df-label">Periodo:</span>
 <button class="df-btn active" onclick="setDateRange('today',this)">Hoy</button>
 <button class="df-btn" onclick="setDateRange('yesterday',this)">Ayer</button>
@@ -329,7 +335,7 @@ body{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 4rem);}
 var SUPABASE_URL='https://hqrwjlrqzslkwhwqcmnh.supabase.co';
 var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxcndqbHJxenNsa3dod3FjbW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDYwMTcsImV4cCI6MjA4Nzg4MjAxN30.tNyO18E7lDNEYH28P_DGxSg9pf1yYysVpJuMwboJOoU';
 var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-var soundOn=false,allOrders=[],allLeads=[],allPageViews=[],allPixelEvents=[],knownOrderIds={},dateRange='today';
+var soundOn=false,allOrders=[],allLeads=[],allPageViews=[],allPixelEvents=[],knownOrderIds={},dateRange='today',sucursalFilter='all';
 var chartRevenue,chartTypes,chartHours,chartWeekday,chartTicket,chartVisitsDay,chartCheckoutMethod,chartScroll;
 
 async function doLogin(){var email=document.getElementById('login-email').value.trim();var pass=document.getElementById('login-pass').value;var err=document.getElementById('login-error');err.style.display='none';if(!email||!pass){err.textContent='Ingresa email y contraseña';err.style.display='block';return;}var{data,error}=await sb.auth.signInWithPassword({email:email,password:pass});if(error){err.textContent='Email o contraseña incorrectos';err.style.display='block';return;}showAdmin();}
@@ -345,10 +351,12 @@ function playNotifSound(){if(!soundOn)return;try{notifAudio.currentTime=0;notifA
 function showNotification(m){var t=document.getElementById('notif-toast');t.textContent=m;t.classList.add('show');playNotifSound();setTimeout(function(){t.classList.remove('show');},4000);}
 
 function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.bnav-item').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');var match=document.querySelector('.bnav-item[data-tab="'+tab+'"]');if(match)match.classList.add('active');var matchTop=document.querySelector('.tab[data-tab="'+tab+'"]');if(matchTop)matchTop.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');}
-function setDateRange(r,el){dateRange=r;document.querySelectorAll('.df-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');renderAll();}
+function setDateRange(r,el){dateRange=r;el.parentElement.querySelectorAll('.df-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');renderAll();}
+function setSucursal(s,el){sucursalFilter=s;el.parentElement.querySelectorAll('.df-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');renderAll();}
 function getDateStart(){var n=new Date(),d;if(dateRange==='today'){d=new Date(n);d.setHours(0,0,0,0);}else if(dateRange==='yesterday'){d=new Date(n);d.setDate(d.getDate()-1);d.setHours(0,0,0,0);}else if(dateRange==='week'){d=new Date(n);d.setDate(d.getDate()-7);d.setHours(0,0,0,0);}else if(dateRange==='month'){d=new Date(n);d.setDate(d.getDate()-30);d.setHours(0,0,0,0);}else{d=new Date(2020,0,1);}return d;}
 function getDateEnd(){if(dateRange==='yesterday'){var d=new Date();d.setHours(0,0,0,0);return d;}return new Date(2099,0,1);}
-function filterByDate(a){var s=getDateStart(),e=getDateEnd();return a.filter(function(r){var d=new Date(r.created_at);return d>=s&&d<e;});}
+function filterBySucursal(a){if(sucursalFilter==='all')return a;return a.filter(function(r){return r.sucursal===sucursalFilter;});}
+function filterByDate(a){var s=getDateStart(),e=getDateEnd();return filterBySucursal(a).filter(function(r){var d=new Date(r.created_at);return d>=s&&d<e;});}
 
 function fTime(d){return new Date(d).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true});}
 function fDate(d){return new Date(d).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+' '+fTime(d);}
@@ -383,10 +391,11 @@ document.getElementById('s-recoger-pct').textContent=n>0?fPct(recC/n*100):'';
 document.getElementById('s-mesa-pct').textContent=n>0?fPct(mesC/n*100):'';
 var fl=filterByDate(allLeads);
 document.getElementById('s-leads').textContent=fl.length;
-document.getElementById('s-leads-sub').textContent='de '+allLeads.length+' total';
+var leadsAllSuc=filterBySucursal(allLeads);
+document.getElementById('s-leads-sub').textContent='de '+leadsAllSuc.length+' total';
 var badge=document.getElementById('orders-badge');if(pending.length>0){badge.textContent=pending.length;badge.style.display='';}else badge.style.display='none';
 var badgeM=document.getElementById('orders-badge-m');if(badgeM){if(pending.length>0){badgeM.textContent=pending.length;badgeM.style.display='';}else badgeM.style.display='none';}
-var lb=document.getElementById('leads-badge');lb.textContent=allLeads.length;lb.style.display=allLeads.length>0?'':'none';
+var lb=document.getElementById('leads-badge');lb.textContent=leadsAllSuc.length;lb.style.display=leadsAllSuc.length>0?'':'none';
 renderRevenueChart(orders);renderTypesChart(domC,recC,mesC);renderHoursChart(orders);renderFunnel(fl,orders);
 }
 
@@ -415,7 +424,7 @@ var checkoutC=pxAll.filter(function(e){return e.event_name==='InitiateCheckout';
 var purchaseC=pxAll.filter(function(e){return e.event_name==='Purchase';}).length;
 
 document.getElementById('v-total').textContent=total;
-document.getElementById('v-total-sub').textContent='de '+allPageViews.length+' total';
+document.getElementById('v-total-sub').textContent='de '+filterBySucursal(allPageViews).length+' total';
 document.getElementById('v-unique').textContent=Object.keys(uniqueIps).length;
 document.getElementById('v-meta').textContent=metaC;
 document.getElementById('v-addcart').textContent=addCartC;
@@ -483,11 +492,11 @@ var bk={'$0-100':0,'$101-200':0,'$201-300':0,'$301-500':0,'$500+':0};active.forE
 
 function renderProducts(){var orders=filterByDate(allOrders).filter(function(o){return o.status!=='cancelled';});var items={};orders.forEach(function(o){if(o.items&&Array.isArray(o.items))o.items.forEach(function(i){var k=i.name;if(!items[k])items[k]={name:k,qty:0,revenue:0};items[k].qty+=(i.qty||1);items[k].revenue+=(i.qty||1)*(i.price||0);});});var sorted=Object.values(items).sort(function(a,b){return b.qty-a.qty;});var el=document.getElementById('top-products');if(sorted.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">🦐</div><div class="empty-text">Sin datos aún</div></div>';return;}var h='';sorted.slice(0,20).forEach(function(it,i){h+='<div class="top-item"><div class="top-rank">'+(i+1)+'</div><div class="top-name">'+it.name+'</div><div class="top-qty">×'+it.qty+'</div><div class="top-rev">'+fMoney(it.revenue)+'</div></div>';});el.innerHTML=h;}
 
-function exportOrders(){var f=filterByDate(allOrders);var csv='Fecha,Tipo,Cliente,Telefono,Direccion,Mesa,HoraRecogida,Items,Total,Status\n';f.forEach(function(o){var it=o.items?o.items.map(function(i){return i.qty+'x '+i.name;}).join(' | '):'';csv+='"'+fDate(o.created_at)+'","'+o.order_type+'","'+(o.customer_name||'')+'","'+(o.customer_phone||'')+'","'+(o.delivery_address||'')+'","'+(o.table_number||'')+'","'+(o.pickup_time||'')+'","'+it+'",'+o.total+',"'+o.status+'"\n';});downloadCSV(csv,'anastacio_pedidos_'+dateRange+'.csv');}
-function exportLeads(){var f=filterByDate(allLeads);var csv='Fecha,Nombre,Telefono,Email,Fuente\n';f.forEach(function(l){csv+='"'+fDate(l.created_at)+'","'+(l.name||'')+'","'+(l.phone||'')+'","'+(l.email||'')+'","'+(l.source||'')+'"\n';});downloadCSV(csv,'anastacio_leads_'+dateRange+'.csv');}
+function exportOrders(){var f=filterByDate(allOrders);var csv='Fecha,Sucursal,Tipo,Cliente,Telefono,Direccion,Mesa,HoraRecogida,Items,Total,Status\n';f.forEach(function(o){var it=o.items?o.items.map(function(i){return i.qty+'x '+i.name;}).join(' | '):'';csv+='"'+fDate(o.created_at)+'","'+(o.sucursal||'')+'","'+o.order_type+'","'+(o.customer_name||'')+'","'+(o.customer_phone||'')+'","'+(o.delivery_address||'')+'","'+(o.table_number||'')+'","'+(o.pickup_time||'')+'","'+it+'",'+o.total+',"'+o.status+'"\n';});downloadCSV(csv,'anastacio_pedidos_'+dateRange+'_'+sucursalFilter+'.csv');}
+function exportLeads(){var f=filterByDate(allLeads);var csv='Fecha,Sucursal,Nombre,Telefono,Email,Fuente\n';f.forEach(function(l){csv+='"'+fDate(l.created_at)+'","'+(l.sucursal||'')+'","'+(l.name||'')+'","'+(l.phone||'')+'","'+(l.email||'')+'","'+(l.source||'')+'"\n';});downloadCSV(csv,'anastacio_leads_'+dateRange+'_'+sucursalFilter+'.csv');}
 function downloadCSV(csv,fn){var b=new Blob([csv],{type:'text/csv;charset=utf-8;'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();}
 
-function setupRealtime(){sb.channel('admin-rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},function(p){showNotification('🦐 ¡NUEVO PEDIDO! — '+typeLabel(p.new.order_type)+' — '+fMoney(p.new.total));loadAll();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'leads'},function(){loadAll();}).subscribe();}
+function setupRealtime(){sb.channel('admin-rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},function(p){if(sucursalFilter!=='all'&&p.new.sucursal!==sucursalFilter){loadAll();return;}var suc=p.new.sucursal?' ['+p.new.sucursal.toUpperCase()+']':'';showNotification('🦐 ¡NUEVO PEDIDO!'+suc+' — '+typeLabel(p.new.order_type)+' — '+fMoney(p.new.total));loadAll();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'leads'},function(){loadAll();}).subscribe();}
 setInterval(loadAll,10000);
 
 // Register Service Worker for PWA
