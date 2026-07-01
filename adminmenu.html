@@ -570,11 +570,28 @@ function downloadCSV(csv,fn){var b=new Blob([csv],{type:'text/csv;charset=utf-8;
 function setupRealtime(){sb.channel('admin-rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},function(p){var rng=getCurrentRange();var when=new Date(p.new.created_at);if(when<rng.start||when>=rng.end)return;if(sucursalFilter!=='all'&&p.new.sucursal!==sucursalFilter){loadAll();return;}var suc=p.new.sucursal?' ['+p.new.sucursal.toUpperCase()+']':'';showNotification('Nuevo pedido'+suc+' — '+typeLabel(p.new.order_type)+' — '+fMoney(p.new.total));loadAll();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'leads'},function(p){var rng=getCurrentRange();var when=new Date(p.new.created_at);if(when<rng.start||when>=rng.end)return;loadAll();}).subscribe();}
 setInterval(loadAll,10000);
 
-// Register Service Worker for PWA
+// Register Service Worker for PWA + auto-update
 if ('serviceWorker' in navigator) {
+  var swDoReload = false, swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (swDoReload && !swRefreshing) { swRefreshing = true; window.location.reload(); }
+  });
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js').then(function(reg) {
-      console.log('SW registered:', reg.scope);
+      reg.update();
+      setInterval(function() { reg.update(); }, 60000);
+      document.addEventListener('visibilitychange', function() { if (!document.hidden) reg.update(); });
+      reg.addEventListener('updatefound', function() {
+        var nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', function() {
+          // Nueva versión lista y ya había una activa -> es un update: activar y recargar
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            swDoReload = true;
+            if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
     }).catch(function(err) {
       console.log('SW registration failed:', err);
     });

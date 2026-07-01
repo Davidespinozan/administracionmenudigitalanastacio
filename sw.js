@@ -32,6 +32,10 @@ self.addEventListener('activate', function(event) {
   self.clients.claim();
 });
 
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', function(event) {
   if (event.request.method !== 'GET' || event.request.url.includes('supabase.co')) {
     return;
