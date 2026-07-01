@@ -1,9 +1,9 @@
-var CACHE_NAME = 'anastacio-admin-v38';
+var CACHE_NAME = 'anastacio-admin-v39';
 var urlsToCache = [
   '/',
   '/index.html',
   '/adminmenu.html',
-  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
 ];
