@@ -339,7 +339,10 @@ body.offline .conn-banner{display:block;}
 .seg-btn{border:none;background:transparent;padding:.5rem 1rem;border-radius:9px;font-family:"IBM Plex Sans","Montserrat",sans-serif;font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;}
 .seg-btn:hover{color:var(--ink);}
 .seg-btn.active{background:var(--dark);color:#fff;box-shadow:0 4px 12px rgba(7,24,38,.22);}
-.range{display:inline-flex;align-items:center;gap:.35rem;}
+.range{display:none;align-items:center;gap:.35rem;}
+.range.open{display:inline-flex;}
+#seg-fechas{display:inline-flex;align-items:center;gap:.35rem;}
+#seg-fechas svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 .range-sep{color:var(--muted);font-size:.75rem;}
 .filter-bar .date-input{padding:.45rem .55rem;font-size:.72rem;border:1px solid var(--line);color:var(--muted);box-shadow:none;}
 .filter-bar .date-input:focus{border-color:var(--gold);color:var(--ink);}
@@ -347,8 +350,12 @@ body.offline .conn-banner{display:block;}
 .filter-bar{padding:.6rem .7rem .2rem;gap:.45rem;}
 .seg{width:100%;display:flex;}
 .seg-btn{flex:1;text-align:center;padding:.55rem .3rem;font-size:.74rem;}
-.range{width:100%;justify-content:center;}
+.range.open{width:100%;justify-content:center;}
 .range .date-input{flex:1;}
+/* En móvil el segmento Fechas es solo icono hasta que hay un rango activo */
+#seg-fechas{padding:.55rem .5rem;flex:0 0 auto;}
+#seg-fechas:not(.active) #seg-fechas-t{display:none;}
+#seg-fechas.active #seg-fechas-t{font-size:.66rem;white-space:nowrap;}
 }
 
 /* ─── Hoja "Más" del bottom-nav móvil ─── */

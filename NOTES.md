@@ -1,5 +1,10 @@
 # Admin Anastacio — notas de arquitectura
 
+**Ámbito del sistema:** este admin mide SOLO el canal digital (pedidos del menú
+online por WhatsApp y tarjeta). La sucursal vende también en sitio con su propio
+punto de venta, que NO pasa por aquí — por eso la sección se llama "Corte online"
+y no "Corte de caja". Nunca presentar estos números como la venta total del negocio.
+
 Panel de administración estático: `index.html` (markup) + `admin.css` + `admin.js` + `sw.js` (PWA).
 Sin build, sin frameworks. Backend: Supabase (auth, tablas `orders`, `leads`, `page_views`, `pixel_events`, realtime).
 `adminmenu.html` es solo un redirect a `/` — **no** es una copia del admin.
