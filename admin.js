@@ -8,11 +8,14 @@ var _charts={};
 function upsertChart(canvasId,cfg){var c=_charts[canvasId];if(c){c.data.labels=cfg.data.labels;c.data.datasets=cfg.data.datasets;c.update('none');return c;}c=new Chart(document.getElementById(canvasId),cfg);_charts[canvasId]=c;return c;}
 function removeChart(canvasId){var c=_charts[canvasId];if(c){c.destroy();delete _charts[canvasId];}}
 
-async function doLogin(){var email=document.getElementById('login-email').value.trim();var pass=document.getElementById('login-pass').value;var err=document.getElementById('login-error');err.style.display='none';if(!email||!pass){err.textContent='Ingresa email y contraseña';err.style.display='block';return;}var{data,error}=await sb.auth.signInWithPassword({email:email,password:pass});if(error){err.textContent='Email o contraseña incorrectos';err.style.display='block';return;}showAdmin();}
+async function doLogin(){var email=document.getElementById('login-email').value.trim();var pass=document.getElementById('login-pass').value;var err=document.getElementById('login-error');err.style.display='none';if(!email||!pass){err.textContent='Ingresa email y contraseña';err.style.display='block';return;}var btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='Entrando…';var{data,error}=await sb.auth.signInWithPassword({email:email,password:pass});btn.disabled=false;btn.textContent='Entrar';if(error){err.textContent='Email o contraseña incorrectos';err.style.display='block';return;}showAdmin();}
 document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 function showAdmin(){document.getElementById('login-screen').style.display='none';document.getElementById('admin-app').style.display='block';document.body.classList.add('logged-in');loadAll();setupRealtime();}
 async function doLogout(){await sb.auth.signOut();document.body.classList.remove('logged-in');document.getElementById('admin-app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('login-pass').value='';}
 sb.auth.getSession().then(function(r){if(r.data.session)showAdmin();});
+// Si la sesión muere (token revocado o refresh fallido), volver al login en vez de fallar en silencio.
+// Ojo: nada de llamadas a Supabase dentro de este callback (deadlock conocido de supabase-js v2).
+sb.auth.onAuthStateChange(function(event){if(event==='SIGNED_OUT'){document.body.classList.remove('logged-in');document.getElementById('admin-app').style.display='none';document.getElementById('login-screen').style.display='flex';}});
 
 var notifAudio = new Audio('https://hqrwjlrqzslkwhwqcmnh.supabase.co/storage/v1/object/public/imagenes/mixkit-software-interface-start-2574_najvah.wav');
 notifAudio.volume = 0.5;
@@ -29,7 +32,7 @@ var _cdlgCb=null;
 function confirmDialog(title,msg,onYes){document.getElementById('cdlg-title').textContent=title;document.getElementById('cdlg-msg').textContent=msg;_cdlgCb=onYes;document.getElementById('cdlg').classList.add('show');}
 function closeCdlg(accepted){var cb=_cdlgCb;_cdlgCb=null;document.getElementById('cdlg').classList.remove('show');if(accepted&&cb)cb();}
 
-function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.bnav-item').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.side-item').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');var match=document.querySelector('.bnav-item[data-tab="'+tab+'"]');if(match)match.classList.add('active');var matchTop=document.querySelector('.tab[data-tab="'+tab+'"]');if(matchTop)matchTop.classList.add('active');var matchSide=document.querySelector('.side-item[data-tab="'+tab+'"]');if(matchSide)matchSide.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');if(tab==='caja'&&!cajaOrders)loadCaja();if(tab==='reports'&&!histOrders)loadHistory();window.scrollTo(0,0);}
+function switchTab(tab,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.bnav-item').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.side-item').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});el.classList.add('active');var match=document.querySelector('.bnav-item[data-tab="'+tab+'"]');if(match)match.classList.add('active');var matchTop=document.querySelector('.tab[data-tab="'+tab+'"]');if(matchTop)matchTop.classList.add('active');var matchSide=document.querySelector('.side-item[data-tab="'+tab+'"]');if(matchSide)matchSide.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');if(tab==='caja'&&!cajaOrders)loadCaja();if((tab==='reports'||tab==='clientes')&&!histOrders)loadHistory();window.scrollTo(0,0);}
 function setQuick(m,el){viewMode=m;customDate=null;customDateEnd=null;ordersPage=1;leadsPage=1;document.querySelectorAll('#period-row .df-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');var di=document.getElementById('custom-date');if(di)di.value='';var de=document.getElementById('custom-date-end');if(de)de.value='';loadAll();}
 function setCustomRange(){var di=document.getElementById('custom-date'),de=document.getElementById('custom-date-end');var s=di.value,e=de.value;if(!s&&e){s=e;e='';di.value=s;de.value='';}if(!s)return;if(e&&e<s){var tmp=s;s=e;e=tmp;di.value=s;de.value=e;}viewMode='custom';customDate=s;customDateEnd=e||null;ordersPage=1;leadsPage=1;document.querySelectorAll('#period-row .df-btn').forEach(function(b){b.classList.remove('active');});loadAll();}
 function setSucursal(s,el){sucursalFilter=s;ordersPage=1;leadsPage=1;el.parentElement.querySelectorAll('.df-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');renderAll();}
@@ -59,7 +62,7 @@ async function loadOrdersPrev(rng){var{data,error}=await sb.from('orders').selec
 var _loadSeq=0,_heavyBusy=false,_lastLoadAt=0;
 async function loadAll(){_lastLoadAt=Date.now();var seq=++_loadSeq;var rng=getCurrentRange();await Promise.all([loadOrders(rng),loadLeads(rng),loadOrdersPrev(getPrevRange(rng))]);if(seq!==_loadSeq)return;renderDashboard();renderOrders();renderLeads();renderAnalytics();renderProducts();refreshCajaIfLive();loadHeavy(rng,seq);}
 async function loadHeavy(rng,seq){if(_heavyBusy)return;_heavyBusy=true;try{await Promise.all([loadPageViews(rng),loadPixelEvents(rng)]);if(seq!==_loadSeq)return;renderDashboard();renderVisitors();}finally{_heavyBusy=false;}}
-function renderAll(){renderDashboard();renderOrders();renderLeads();renderVisitors();renderAnalytics();renderProducts();if(cajaOrders)renderCaja();if(histOrders)renderReports();}
+function renderAll(){renderDashboard();renderOrders();renderLeads();renderVisitors();renderAnalytics();renderProducts();if(cajaOrders)renderCaja();if(histOrders){renderReports();renderClientes();}}
 
 function renderDashboard(){
 var orders=filterByDate(allOrders).filter(function(o){return o.status!=='cancelled';});
@@ -240,10 +243,10 @@ function monthRangeKeys(firstK,lastK){var out=[],p=firstK.split('-'),y=parseInt(
 async function loadHistory(force){if(_histLoading)return;if(histOrders&&!force){renderReports();return;}
 _histLoading=true;var note=document.getElementById('rep-note');if(note)note.textContent='Cargando histórico completo…';
 var all=[],from=0,size=1000;
-while(true){var r=await sb.from('orders').select('created_at,total,status,order_type,sucursal,customer_phone').order('created_at',{ascending:true}).range(from,from+size-1);
+while(true){var r=await sb.from('orders').select('created_at,total,status,order_type,sucursal,customer_phone,customer_name').order('created_at',{ascending:true}).range(from,from+size-1);
 if(r.error){console.error('Historico:',JSON.stringify(r.error));_histLoading=false;if(note)note.textContent='Error al cargar el histórico. Intenta de nuevo.';showError('No se pudo cargar el histórico.');return;}
 var data=r.data||[];all=all.concat(data);if(data.length<size)break;if(all.length>=50000){console.warn('histórico: tope de 50000 filas alcanzado');break;}from+=size;}
-histOrders=all;_histLoading=false;if(note)note.textContent='';renderReports();}
+histOrders=all;_histLoading=false;if(note)note.textContent='';renderReports();renderClientes();}
 function renderReports(){if(!histOrders)return;
 var act=filterBySucursal(histOrders).filter(function(o){return o.status!=='cancelled';});
 var note=document.getElementById('rep-note');
@@ -276,6 +279,47 @@ var dtxt='—',dcol='var(--muted)';
 if(prev&&prev.rev>0){var d=Math.round((m.rev-prev.rev)/prev.rev*100);dtxt=(d>=0?'▲ +':'▼ ')+d+'%';dcol=d>=0?'var(--green)':'var(--red)';}
 rows+='<tr><td style="font-weight:600;white-space:nowrap">'+monthLabel(k)+'</td><td class="num">'+m.n+'</td><td class="num" style="font-weight:700;color:var(--gold)">'+fMoney(m.rev)+'</td><td class="num">'+(m.n>0?fMoney(Math.round(m.rev/m.n)):'—')+'</td><td class="num" style="font-weight:700;color:'+dcol+'">'+dtxt+'</td></tr>';}
 document.getElementById('rep-body').innerHTML=rows;}
+// ─── CLIENTES: CRM derivado del histórico de pedidos (solo pedidos con teléfono) ───
+var clientesPage=1,clientesSort='gasto';
+function setClientesSort(v){clientesSort=v;clientesPage=1;renderClientes();}
+function searchClientes(){clientesPage=1;renderClientes();}
+function setClientesPage(p){clientesPage=p;renderClientes();var t=document.getElementById('panel-clientes');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
+function waLink(phone){var d=String(phone).replace(/\D/g,'');if(d.length===10)d='52'+d;return'https://wa.me/'+d;}
+function buildClientes(){var act=filterBySucursal(histOrders).filter(function(o){return o.status!=='cancelled'&&o.customer_phone;});
+var map={};
+act.forEach(function(o){var k=o.customer_phone;if(!map[k])map[k]={phone:k,name:'',n:0,total:0,first:o.created_at,last:o.created_at};var c=map[k];c.n++;c.total+=Number(o.total);if(o.customer_name)c.name=o.customer_name;if(o.created_at>c.last)c.last=o.created_at;if(o.created_at<c.first)c.first=o.created_at;});
+return Object.values(map);}
+function clienteBadge(n){if(n>=4)return'<span class="status delivered">VIP · '+n+'</span>';if(n>=2)return'<span class="status confirmed">Repite · '+n+'</span>';return'<span class="status ready">Nuevo</span>';}
+function renderClientes(){if(!histOrders)return;
+var list=buildClientes();
+var now=Date.now();
+document.getElementById('cl-total').textContent=list.length.toLocaleString('es-MX');
+var rec=list.filter(function(c){return c.n>=2;});
+document.getElementById('cl-recurrentes').textContent=rec.length.toLocaleString('es-MX');
+document.getElementById('cl-recurrentes-sub').textContent=list.length>0?fPct(rec.length/list.length*100)+' del total':'';
+var inact=list.filter(function(c){return c.n>=2&&(now-new Date(c.last).getTime())>30*864e5;});
+document.getElementById('cl-inactivos').textContent=inact.length.toLocaleString('es-MX');
+var spend=0;list.forEach(function(c){spend+=c.total;});
+document.getElementById('cl-gasto').textContent=list.length>0?fMoney(Math.round(spend/list.length)):'—';
+var q=(document.getElementById('cl-search').value||'').trim().toLowerCase();
+if(q)list=list.filter(function(c){return(c.name+' '+c.phone).toLowerCase().indexOf(q)>-1;});
+if(clientesSort==='pedidos')list.sort(function(a,b){return b.n-a.n||b.total-a.total;});
+else if(clientesSort==='reciente')list.sort(function(a,b){return a.last<b.last?1:-1;});
+else list.sort(function(a,b){return b.total-a.total;});
+var body=document.getElementById('clientes-body');
+if(list.length===0){body.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-text">'+(q?'Sin resultados para esa búsqueda':'Aún no hay clientes con teléfono registrado')+'</div></div></td></tr>';renderTablePagination('clientes-pagination',0,1,'setClientesPage');return;}
+var totalPg=Math.max(1,Math.ceil(list.length/PAGE_SIZE));if(clientesPage>totalPg)clientesPage=totalPg;
+var pageRows=list.slice((clientesPage-1)*PAGE_SIZE,clientesPage*PAGE_SIZE);
+var rows='';
+pageRows.forEach(function(c){
+var days=Math.floor((now-new Date(c.last).getTime())/864e5);
+var lastTxt=days===0?'hoy':days===1?'ayer':'hace '+days+' días';
+var lastCol=days>30?'var(--red)':days>14?'var(--amber)':'var(--muted)';
+rows+='<tr><td>'+(esc(c.name)||'—')+'<br><small style="color:var(--muted)">'+esc(c.phone)+'</small></td><td>'+clienteBadge(c.n)+'</td><td class="num" style="white-space:nowrap;font-weight:700;color:var(--gold)">'+fMoney(c.total)+'</td><td class="num">'+fMoney(Math.round(c.total/c.n))+'</td><td style="white-space:nowrap">'+new Date(c.last).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'})+'<br><small style="font-weight:600;color:'+lastCol+'">'+lastTxt+'</small></td><td><a class="wa-btn" href="'+esc(waLink(c.phone))+'" target="_blank" rel="noopener" title="Abrir WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a></td></tr>';});
+body.innerHTML=rows;
+renderTablePagination('clientes-pagination',list.length,clientesPage,'setClientesPage');}
+function exportClientes(){if(!histOrders)return;var list=buildClientes().sort(function(a,b){return b.total-a.total;});var csv='Nombre,Telefono,Pedidos,TotalGastado,TicketPromedio,PrimerPedido,UltimoPedido\n';list.forEach(function(c){csv+=[c.name,c.phone,c.n,c.total,Math.round(c.total/c.n),fDate(c.first),fDate(c.last)].map(csvCell).join(',')+'\n';});downloadCSV(csv,'anastacio_clientes_'+sucursalFilter+'.csv');}
+
 function exportMonthly(){if(!histOrders)return;var act=filterBySucursal(histOrders).filter(function(o){return o.status!=='cancelled';});var byMonth={};act.forEach(function(o){var k=monthKey(o.created_at);if(!byMonth[k])byMonth[k]={rev:0,n:0};byMonth[k].rev+=Number(o.total);byMonth[k].n++;});var csv='Mes,Pedidos,Venta,TicketPromedio\n';Object.keys(byMonth).sort().forEach(function(k){var m=byMonth[k];csv+=[k,m.n,m.rev,Math.round(m.rev/m.n)].map(csvCell).join(',')+'\n';});downloadCSV(csv,'anastacio_mensual_'+sucursalFilter+'.csv');}
 
 function setupRealtime(){sb.channel('admin-rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},function(p){var rng=getCurrentRange();var when=new Date(p.new.created_at);if(when<rng.start||when>=rng.end)return;if(sucursalFilter!=='all'&&p.new.sucursal!==sucursalFilter){loadAll();return;}var suc=p.new.sucursal?' ['+p.new.sucursal.toUpperCase()+']':'';showNotification('Nuevo pedido'+suc+' — '+typeLabel(p.new.order_type)+' — '+fMoney(p.new.total));loadAll();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'leads'},function(p){var rng=getCurrentRange();var when=new Date(p.new.created_at);if(when<rng.start||when>=rng.end)return;loadAll();}).subscribe();}

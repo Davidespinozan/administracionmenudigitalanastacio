@@ -325,6 +325,10 @@ body.offline .conn-banner{display:block;}
 .kv-v{font-family:var(--num);font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);}
 .rep-note{padding:.2rem 1.5rem .6rem;font-size:.72rem;color:var(--muted);font-weight:600;}
 .rep-note:empty{display:none;}
+.wa-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;background:rgba(37,211,102,.12);color:#059669;border:1px solid rgba(37,211,102,.3);transition:all .16s ease;}
+.wa-btn:hover{background:#25D366;color:#fff;border-color:#25D366;box-shadow:0 8px 18px rgba(37,211,102,.3);}
+.wa-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.login-btn:disabled{opacity:.7;cursor:wait;transform:none;}
 @media(max-width:768px){
 .rep-note{padding:.2rem .7rem .5rem;}
 /* 8 items en el bottom-nav: permitir scroll horizontal sin barra visible */

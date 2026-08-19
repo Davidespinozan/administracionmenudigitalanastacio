@@ -27,7 +27,7 @@
 <input type="email" id="login-email" class="login-input" placeholder="Email" autocomplete="username" autocapitalize="none" spellcheck="false">
 <input type="password" id="login-pass" class="login-input" placeholder="Contraseña" autocomplete="current-password">
 <div id="login-error" style="color:#dc2626;font-size:.72rem;font-weight:600;margin-bottom:.5rem;display:none;"></div>
-<button class="login-btn" onclick="doLogin()">Entrar</button>
+<button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
 <div class="login-foot">Solo personal autorizado</div>
 </div>
 </div>
@@ -39,6 +39,7 @@
 <div class="side-item" data-tab="orders" onclick="switchTab('orders',this)"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>Pedidos</span><span class="tab-badge" id="orders-badge-s" style="display:none">0</span></div>
 <div class="side-item" data-tab="caja" onclick="switchTab('caja',this)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg><span>Caja</span></div>
 <div class="side-item" data-tab="reports" onclick="switchTab('reports',this)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reportes</span></div>
+<div class="side-item" data-tab="clientes" onclick="switchTab('clientes',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>Clientes</span></div>
 <div class="side-item" data-tab="leads" onclick="switchTab('leads',this)"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Leads</span><span class="tab-badge" id="leads-badge-s" style="display:none">0</span></div>
 <div class="side-item" data-tab="analytics" onclick="switchTab('analytics',this)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4"/></svg><span>Analytics</span></div>
 <div class="side-item" data-tab="visitors" onclick="switchTab('visitors',this)"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span>Visitantes</span><span class="tab-badge" id="visitors-badge-s" style="display:none">0</span></div>
@@ -194,12 +195,30 @@
 <div class="table-header"><div class="table-title">Detalle mensual</div></div>
 <div class="table-wrap"><table><thead><tr><th>MES</th><th>PEDIDOS</th><th>VENTA</th><th>TICKET</th><th>VS MES ANTERIOR</th></tr></thead><tbody id="rep-body"><tr><td colspan="5"><div class="empty"><div class="empty-text">Cargando...</div></div></td></tr></tbody></table></div>
 </div>
+<div class="panel" id="panel-clientes">
+<div class="table-header"><div class="table-title">Clientes</div>
+<div class="table-actions">
+<input type="search" id="cl-search" class="date-input" placeholder="Buscar nombre o teléfono…" oninput="searchClientes()" style="min-width:150px;">
+<select class="filter-select" id="cl-sort" onchange="setClientesSort(this.value)"><option value="gasto">Por gasto total</option><option value="pedidos">Por # pedidos</option><option value="reciente">Más recientes</option></select>
+<button class="export-btn" onclick="loadHistory(true)"><svg class="ico" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>ACTUALIZAR</button>
+<button class="export-btn" onclick="exportClientes()"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>CSV</button>
+</div></div>
+<div class="stats-bar">
+<div class="stat-card"><div class="stat-value" id="cl-total">—</div><div class="stat-label">Clientes</div><div class="stat-sub">con teléfono registrado</div></div>
+<div class="stat-card"><div class="stat-value green" id="cl-recurrentes">—</div><div class="stat-label">Recurrentes</div><div class="stat-sub" id="cl-recurrentes-sub"></div></div>
+<div class="stat-card"><div class="stat-value red" id="cl-inactivos">—</div><div class="stat-label">Inactivos</div><div class="stat-sub">recurrentes sin pedir 30+ días</div></div>
+<div class="stat-card"><div class="stat-value blue" id="cl-gasto">—</div><div class="stat-label">Gasto por cliente</div><div class="stat-sub">promedio histórico</div></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>CLIENTE</th><th>NIVEL</th><th>TOTAL GASTADO</th><th>TICKET</th><th>ÚLTIMO PEDIDO</th><th>WA</th></tr></thead><tbody id="clientes-body"><tr><td colspan="6"><div class="empty"><div class="empty-text">Cargando...</div></div></td></tr></tbody></table></div>
+<div class="pagination-bar" id="clientes-pagination"></div>
+</div>
 </div>
 <nav class="bottom-nav">
 <div class="bnav-item active" onclick="switchTab('dashboard',this)" data-tab="dashboard"><span class="bnav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="bnav-label">Inicio</span></div>
 <div class="bnav-item" onclick="switchTab('orders',this)" data-tab="orders"><span class="bnav-icon"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="bnav-label">Pedidos</span><span class="tab-badge" id="orders-badge-m" style="display:none">0</span></div>
 <div class="bnav-item" onclick="switchTab('caja',this)" data-tab="caja"><span class="bnav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg></span><span class="bnav-label">Caja</span></div>
 <div class="bnav-item" onclick="switchTab('reports',this)" data-tab="reports"><span class="bnav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span><span class="bnav-label">Reportes</span></div>
+<div class="bnav-item" onclick="switchTab('clientes',this)" data-tab="clientes"><span class="bnav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span><span class="bnav-label">Clientes</span></div>
 <div class="bnav-item" onclick="switchTab('leads',this)" data-tab="leads"><span class="bnav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="bnav-label">Leads</span></div>
 <div class="bnav-item" onclick="switchTab('analytics',this)" data-tab="analytics"><span class="bnav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4"/></svg></span><span class="bnav-label">Analytics</span></div>
 <div class="bnav-item" onclick="switchTab('visitors',this)" data-tab="visitors"><span class="bnav-icon"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span><span class="bnav-label">Visitas</span></div>
