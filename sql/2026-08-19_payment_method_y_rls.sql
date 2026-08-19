@@ -15,6 +15,11 @@
 --
 -- Orden de despliegue: 1º este SQL → 2º menú → 3º redeploy smart-function
 -- → 4º admin. El script es idempotente: correrlo dos veces no daña nada.
+--
+-- Verificado (2026-08-19): el menú público (~/anastacio-1) solo hace
+-- INSERTs (leads, page_views, pixel_events) — ningún SELECT. Quitar la
+-- lectura anónima NO puede romper el menú. El webhook de Stripe usa
+-- service_role, que ignora RLS, así que tampoco se afecta.
 -- ═══════════════════════════════════════════════════════════════════════
 
 BEGIN;
