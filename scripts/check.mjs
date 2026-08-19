@@ -26,7 +26,7 @@ if (missing.length) fail(`ids usados en admin.js que no existen en index.html: $
 else ok(`los ${new Set(jsIds).size} ids referenciados en admin.js existen en index.html`);
 
 // 3. Toda función usada en onclick/onchange del HTML debe estar definida en admin.js
-const handlers = [...html.matchAll(/on(?:click|change)="(?:if\([^)]*\))?([a-zA-Z_$][\w$]*)\(/g)].map(m => m[1]);
+const handlers = [...html.matchAll(/on(?:click|change|input)="(?:if\([^)]*\))?([a-zA-Z_$][\w$]*)\(/g)].map(m => m[1]);
 const undef = [...new Set(handlers)].filter(fn => !new RegExp(`function ${fn}\\(`).test(js));
 if (undef.length) fail(`handlers del HTML sin función en admin.js: ${undef.join(', ')}`);
 else ok(`los ${new Set(handlers).size} handlers del HTML están definidos en admin.js`);

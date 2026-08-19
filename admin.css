@@ -316,3 +316,28 @@ body.offline .conn-banner{display:block;}
 .cdlg-btn:hover{color:var(--ink);border-color:var(--ink-2);}
 .cdlg-btn.danger{background:var(--red);border-color:var(--red);color:#fff;}
 .cdlg-btn.danger:hover{filter:brightness(1.08);box-shadow:0 10px 24px rgba(220,38,38,.3);}
+
+/* ─── Caja y Reportes ─── */
+.kv-list{display:flex;flex-direction:column;gap:.45rem;}
+.kv-row{display:flex;align-items:center;justify-content:space-between;font-size:.8rem;padding:.55rem .75rem;background:rgba(8,20,27,.03);border-radius:10px;}
+.kv-k{color:var(--ink-2);font-weight:600;}
+.kv-sub{color:var(--muted);font-size:.66rem;margin-left:.45rem;font-weight:600;}
+.kv-v{font-family:var(--num);font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);}
+.rep-note{padding:.2rem 1.5rem .6rem;font-size:.72rem;color:var(--muted);font-weight:600;}
+.rep-note:empty{display:none;}
+@media(max-width:768px){
+.rep-note{padding:.2rem .7rem .5rem;}
+/* 8 items en el bottom-nav: permitir scroll horizontal sin barra visible */
+body.logged-in .bottom-nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.bottom-nav::-webkit-scrollbar{display:none;}
+.bnav-item{flex:1 0 auto;min-width:3.2rem;padding-left:.35rem;padding-right:.35rem;}
+}
+
+/* ─── Impresión: solo el panel activo (pensado para el corte de caja) ─── */
+@media print{
+.side,.admin-header,.tabs,.date-filter,.bottom-nav,.conn-banner,.notif-toast,.table-actions,.pagination-bar,.cdlg-overlay{display:none!important;}
+#admin-app{padding-left:0!important;padding-top:0!important;}
+body{background:#fff!important;padding-bottom:0!important;}
+.stat-card,.chart-card,.table-wrap,.top-item{box-shadow:none!important;border:1px solid #ddd!important;background:#fff!important;}
+.stat-card:hover,.chart-card:hover{transform:none!important;}
+}
