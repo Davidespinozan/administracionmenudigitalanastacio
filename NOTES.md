@@ -11,6 +11,14 @@ Sin build, sin frameworks. Backend: Supabase (auth, tablas `orders`, `leads`, `p
 3. Subir la versión de `CACHE_NAME` en `sw.js` (v46 → v47 → …). Sin esto las PWAs instaladas tardan en ver el cambio.
 4. Commit atómico por mejora; revertir = `git revert`.
 
+## URLs de producción
+
+- **Admin**: https://menuanastacioadmin.netlify.app (este repo, deploy automático al push a main).
+  Ojo: `anastacioadmin.netlify.app` es un nombre viejo que ya no existe.
+- **Menú público**: https://anastaciomarisqueria.com — la raíz sirve `landing.html`; el menú real
+  (carrito/checkout) está en `/cln` → `index.html` (ver `_redirects` en `~/anastacio-1`).
+  Repo: `~/anastacio-1` → github.com/Davidespinozan/anastacio, deploy automático al push a main.
+
 ## Integración con el resto del sistema
 
 - `sql/` — scripts para correr en Supabase SQL Editor (RLS, columnas). Cada uno documenta el porqué y termina con verificación.
