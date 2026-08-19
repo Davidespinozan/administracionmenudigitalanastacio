@@ -1,0 +1,12 @@
+{
+  "name": "anastacio-admin",
+  "private": true,
+  "description": "Panel de administración Anastacio — estático, sin build. Node solo para checks y e2e.",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.0"
+  }
+}

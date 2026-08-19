@@ -7,8 +7,15 @@ Sin build, sin frameworks. Backend: Supabase (auth, tablas `orders`, `leads`, `p
 ## Antes de desplegar
 
 1. `node scripts/check.mjs` — debe salir todo verde.
-2. Subir la versión de `CACHE_NAME` en `sw.js` (v46 → v47 → …). Sin esto las PWAs instaladas tardan en ver el cambio.
-3. Commit atómico por mejora; revertir = `git revert`.
+2. `npm run test:e2e` — smoke en navegador real (requiere `npm install` una vez). CI lo corre en cada push.
+3. Subir la versión de `CACHE_NAME` en `sw.js` (v46 → v47 → …). Sin esto las PWAs instaladas tardan en ver el cambio.
+4. Commit atómico por mejora; revertir = `git revert`.
+
+## Integración con el resto del sistema
+
+- `sql/` — scripts para correr en Supabase SQL Editor (RLS, columnas). Cada uno documenta el porqué y termina con verificación.
+- `integracion-menu/README.md` — cambios pendientes de aplicar en el menú público (`~/anastacio-1`): guardar pedidos de WhatsApp y `payment_method`. **Respetar el orden de despliegue que indica.**
+- El webhook de Stripe (`smart-function`) inserta los pedidos pagados con tarjeta server-side.
 
 ## NO hacer (cada punto es un bug que ya pasó)
 
