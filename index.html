@@ -74,13 +74,15 @@
 <button class="df-btn" onclick="setQuick('yesterday',this)">Ayer</button>
 <button class="df-btn" onclick="setQuick('week',this)">Semana</button>
 <button class="df-btn" onclick="setQuick('month',this)">Mes</button>
-<input type="date" id="custom-date" class="date-input" onchange="setCustomDate(this.value)" title="Día específico">
+<input type="date" id="custom-date" class="date-input" onchange="setCustomRange()" title="Desde">
+<span class="df-label" style="margin:0;letter-spacing:0;">→</span>
+<input type="date" id="custom-date-end" class="date-input" onchange="setCustomRange()" title="Hasta (opcional)">
 </div>
 <div class="panel active" id="panel-dashboard">
 <div class="stats-bar">
-<div class="stat-card"><div class="stat-value" id="s-orders">—</div><div class="stat-label">Pedidos</div></div>
-<div class="stat-card"><div class="stat-value green" id="s-revenue">—</div><div class="stat-label">Venta total</div></div>
-<div class="stat-card"><div class="stat-value" id="s-ticket">—</div><div class="stat-label">Ticket promedio</div></div>
+<div class="stat-card"><div class="stat-value" id="s-orders">—</div><div class="stat-label">Pedidos</div><div class="stat-sub" id="s-orders-delta"></div></div>
+<div class="stat-card"><div class="stat-value green" id="s-revenue">—</div><div class="stat-label">Venta total</div><div class="stat-sub" id="s-revenue-delta"></div></div>
+<div class="stat-card"><div class="stat-value" id="s-ticket">—</div><div class="stat-label">Ticket promedio</div><div class="stat-sub" id="s-ticket-delta"></div></div>
 <div class="stat-card"><div class="stat-value red" id="s-pending">—</div><div class="stat-label">Pendientes</div></div>
 <div class="stat-card"><div class="stat-value blue" id="s-domicilio">—</div><div class="stat-label">Domicilio</div><div class="stat-sub" id="s-domicilio-pct"></div></div>
 <div class="stat-card"><div class="stat-value" id="s-recoger">—</div><div class="stat-label">Recoger</div><div class="stat-sub" id="s-recoger-pct"></div></div>
