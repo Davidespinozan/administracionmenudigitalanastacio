@@ -71,11 +71,12 @@
       limit: function (n) { q._limit = n; return api; },
       range: function (a, b) { q._range = [a, b]; return api; },
       eq: function (c, v) { q._eq = v; return api; },
+      in: function (c, v) { q._in = v; return api; },
       update: function (p) { q._update = p; return api; },
       then: function (res, rej) {
         if (q._update) {
-          var o = rows.filter(function (x) { return x.id === q._eq; })[0];
-          if (o) Object.assign(o, q._update);
+          rows.filter(function (x) { return q._in ? q._in.indexOf(x.id) > -1 : x.id === q._eq; })
+            .forEach(function (o) { Object.assign(o, q._update); });
           return Promise.resolve({ data: null, error: null }).then(res, rej);
         }
         var out = rows.filter(function (x) { return (!q._gte || x.created_at >= q._gte) && (!q._lt || x.created_at < q._lt); });
